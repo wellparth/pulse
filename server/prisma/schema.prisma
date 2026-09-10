@@ -1,0 +1,75 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  fullName     String?
+  plan         String    @default("free")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  projects     Project[]
+
+  @@map("users")
+}
+
+model Project {
+  id           String        @id @default(uuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  slug         String        @unique
+  createdAt    DateTime      @default(now())
+  integrations Integration[]
+  metrics      DailyMetric[]
+  anomalies    Anomaly[]
+
+  @@map("projects")
+}
+
+model Integration {
+  id              String   @id @default(uuid())
+  projectId       String
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  provider        String
+  apiKeyEncrypted String
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  @@unique([projectId, provider])
+  @@map("integrations")
+}
+
+model DailyMetric {
+  id           String   @id @default(uuid())
+  projectId    String
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  date         DateTime
+  mrrCents     Int      @default(0)
+  signupsCount Int      @default(0)
+  errorsCount  Int      @default(0)
+  starsCount   Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  @@unique([projectId, date])
+  @@map("daily_metrics")
+}
+
+model Anomaly {
+  id        String   @id @default(uuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type      String
+  message   String
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("anomalies")
+}
