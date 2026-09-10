@@ -1,13 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Zap, DollarSign, Users, ShieldAlert, Star, 
-  CheckCircle2, RefreshCw, Plus, ArrowUpRight, Terminal
+  CheckCircle2, RefreshCw, Plus, Terminal, ExternalLink
 } from 'lucide-react';
 
 export default function Dashboard() {
   const [isSyncing, setIsSyncing] = useState(false);
+  const [notification, setNotification] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('connected')) {
+      const provider = params.get('connected');
+      setNotification(`🎉 Successfully connected ${provider?.toUpperCase()} via OAuth 2.0!`);
+    }
+  }, []);
 
   const metrics = [
     { label: 'Stripe MRR', value: '$1,240.00', change: '+12.5%', isPositive: true, icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
@@ -17,10 +26,10 @@ export default function Dashboard() {
   ];
 
   const integrations = [
-    { name: 'Stripe', status: 'Connected', lastSync: '10m ago', provider: 'stripe', active: true },
-    { name: 'PostHog', status: 'Connected', lastSync: '15m ago', provider: 'posthog', active: true },
-    { name: 'Sentry', status: 'Connected', lastSync: '5m ago', provider: 'sentry', active: true },
-    { name: 'GitHub', status: 'Connected', lastSync: '1h ago', provider: 'github', active: true },
+    { name: 'Stripe Billing', status: 'Connected', provider: 'stripe', oauthUrl: 'http://localhost:4000/api/v1/auth/stripe' },
+    { name: 'GitHub Repositories', status: 'Connected', provider: 'github', oauthUrl: 'http://localhost:4000/api/v1/auth/github' },
+    { name: 'PostHog Analytics', status: 'Connected', provider: 'posthog', oauthUrl: '#' },
+    { name: 'Sentry Exception Tracker', status: 'Connected', provider: 'sentry', oauthUrl: '#' },
   ];
 
   const triggerManualSync = () => {
@@ -58,6 +67,13 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-8 py-10 space-y-10">
         
+        {notification && (
+          <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-xl text-sm font-semibold flex justify-between items-center">
+            <span>{notification}</span>
+            <button onClick={() => setNotification(null)} className="text-xs opacity-60 hover:opacity-100">Dismiss</button>
+          </div>
+        )}
+
         {/* Welcome & Status Banner */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-900 pb-6">
           <div>
@@ -105,29 +121,36 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Active Integrations */}
+        {/* Active Integrations & OAuth Connectors */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white">Connected Integrations</h2>
-            <button className="flex items-center space-x-1 text-xs text-amber-400 hover:underline font-semibold">
-              <Plus className="h-3.5 w-3.5" />
-              <span>Add Integration</span>
-            </button>
+            <h2 className="text-lg font-bold text-white">OAuth Integrations & Account Linking</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {integrations.map((item, idx) => (
-              <div key={idx} className="bg-slate-900/40 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
+              <div key={idx} className="bg-slate-900/40 border border-slate-800 p-5 rounded-xl flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
                   <div>
                     <div className="text-sm font-semibold text-white">{item.name}</div>
-                    <div className="text-xs text-slate-500">Synced {item.lastSync}</div>
+                    <div className="text-xs text-slate-500">1-Click OAuth 2.0 Connection</div>
                   </div>
                 </div>
-                <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
-                  {item.status}
-                </span>
+                
+                {item.oauthUrl !== '#' ? (
+                  <a 
+                    href={item.oauthUrl}
+                    className="flex items-center space-x-1.5 text-xs font-bold bg-amber-400 hover:bg-amber-300 text-slate-950 px-3 py-1.5 rounded-lg transition"
+                  >
+                    <span>Connect OAuth</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                ) : (
+                  <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
+                    Connected
+                  </span>
+                )}
               </div>
             ))}
           </div>
