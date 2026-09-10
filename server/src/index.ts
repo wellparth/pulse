@@ -4,6 +4,7 @@ import { healthRoutes } from './routes/health.js';
 import { metricsRoutes } from './routes/metrics.js';
 import { integrationsRoutes } from './routes/integrations.js';
 import { oauthRoutes } from './routes/oauth.js';
+import { notificationRoutes } from './routes/notifications.js';
 
 const fastify = Fastify({
   logger: {
@@ -25,6 +26,7 @@ async function main() {
   await fastify.register(metricsRoutes);
   await fastify.register(integrationsRoutes);
   await fastify.register(oauthRoutes);
+  await fastify.register(notificationRoutes);
 
   const PORT = Number(process.env.PORT) || 4000;
   const HOST = process.env.HOST || '0.0.0.0';
