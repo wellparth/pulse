@@ -1,10 +1,12 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import fastifyJwt from '@fastify/jwt';
 import { healthRoutes } from './routes/health.js';
 import { metricsRoutes } from './routes/metrics.js';
 import { integrationsRoutes } from './routes/integrations.js';
 import { oauthRoutes } from './routes/oauth.js';
 import { notificationRoutes } from './routes/notifications.js';
+import { authRoutes } from './routes/auth.js';
 
 const fastify = Fastify({
   logger: {
@@ -22,11 +24,16 @@ async function main() {
     origin: '*',
   });
 
+  await fastify.register(fastifyJwt, {
+    secret: process.env.JWT_SECRET || 'dailypulse-super-secret-key-change-in-production',
+  });
+
   await fastify.register(healthRoutes);
   await fastify.register(metricsRoutes);
   await fastify.register(integrationsRoutes);
   await fastify.register(oauthRoutes);
   await fastify.register(notificationRoutes);
+  await fastify.register(authRoutes);
 
   const PORT = Number(process.env.PORT) || 4000;
   const HOST = process.env.HOST || '0.0.0.0';

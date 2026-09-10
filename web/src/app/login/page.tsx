@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { Zap, Mail, Lock, ArrowRight } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -10,33 +9,34 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const supabase = createClient();
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const res = await fetch('http://localhost:4000/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (error) {
-      setErrorMsg(error.message);
-      setLoading(false);
-    } else {
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      localStorage.setItem('dailypulse_token', data.token);
       window.location.href = '/dashboard';
+    } catch (err) {
+      setErrorMsg((err as Error).message);
+      setLoading(false);
     }
   };
 
-  const handleGitHubLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`,
-      },
-    });
+  const handleGitHubLogin = () => {
+    window.location.href = 'http://localhost:4000/api/v1/auth/github';
   };
 
   return (
@@ -51,7 +51,7 @@ export default function LoginPage() {
       <div className="bg-slate-900 border border-slate-800 w-full max-w-md p-8 rounded-2xl shadow-xl space-y-6">
         <div>
           <h1 className="text-xl font-bold text-white">Welcome back</h1>
-          <p className="text-sm text-slate-400 mt-1">Sign in to your DailyPulse dashboard.</p>
+          <p className="text-sm text-slate-400 mt-1">Sign in to your DailyPulse dashboard via Fastify API.</p>
         </div>
 
         {errorMsg && (

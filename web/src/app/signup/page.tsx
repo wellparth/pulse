@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { Zap, Mail, Lock, ArrowRight } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -10,36 +9,34 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const supabase = createClient();
-
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg(null);
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-      },
-    });
+    try {
+      const res = await fetch('http://localhost:4000/api/v1/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (error) {
-      setErrorMsg(error.message);
-      setLoading(false);
-    } else {
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Registration failed');
+      }
+
+      localStorage.setItem('dailypulse_token', data.token);
       window.location.href = '/dashboard?created=true';
+    } catch (err) {
+      setErrorMsg((err as Error).message);
+      setLoading(false);
     }
   };
 
-  const handleGitHubSignup = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`,
-      },
-    });
+  const handleGitHubSignup = () => {
+    window.location.href = 'http://localhost:4000/api/v1/auth/github';
   };
 
   return (
@@ -54,7 +51,7 @@ export default function SignupPage() {
       <div className="bg-slate-900 border border-slate-800 w-full max-w-md p-8 rounded-2xl shadow-xl space-y-6">
         <div>
           <h1 className="text-xl font-bold text-white">Create your account</h1>
-          <p className="text-sm text-slate-400 mt-1">Start tracking your micro-SaaS metrics in 2 minutes.</p>
+          <p className="text-sm text-slate-400 mt-1">Start tracking your micro-SaaS metrics in 2 minutes via Fastify.</p>
         </div>
 
         {errorMsg && (
