@@ -3,7 +3,7 @@ import { FastifyInstance } from 'fastify';
 export async function oauthRoutes(fastify: FastifyInstance) {
   // 1. GitHub OAuth Redirect
   fastify.get('/api/v1/auth/github', async (request, reply) => {
-    const clientId = process.env.GITHUB_CLIENT_ID || 'dummy_github_client_id';
+    const clientId = process.env.GITHUB_CLIENT_ID || 'Ov23li5EUqvA9ytjhicY';
     const redirectUri = encodeURIComponent(`${process.env.APP_URL || 'http://localhost:4000'}/api/v1/auth/github/callback`);
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=repo,read:user`;
 
@@ -19,8 +19,8 @@ export async function oauthRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      const clientId = process.env.GITHUB_CLIENT_ID || 'dummy_github_client_id';
-      const clientSecret = process.env.GITHUB_CLIENT_SECRET || 'dummy_github_secret';
+      const clientId = process.env.GITHUB_CLIENT_ID || 'Ov23li5EUqvA9ytjhicY';
+      const clientSecret = process.env.GITHUB_CLIENT_SECRET || '35240109a659b52ad520577fc1f35c992dc70773';
 
       const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
         method: 'POST',
