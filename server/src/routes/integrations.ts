@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 
 const ConnectSchema = z.object({
-  provider: z.enum(['stripe', 'github', 'posthog', 'sentry']),
+  provider: z.enum(['stripe', 'github', 'posthog', 'sentry', 'vercel']),
   apiKey: z.string().min(1),
   meta: z.record(z.any()).optional(),
 });
@@ -16,6 +16,7 @@ export async function integrationsRoutes(fastify: FastifyInstance) {
         { id: '2', provider: 'posthog', name: 'PostHog Analytics', connected: Boolean(process.env.POSTHOG_API_KEY), lastSynced: new Date().toISOString() },
         { id: '3', provider: 'sentry', name: 'Sentry Error Tracking', connected: Boolean(process.env.SENTRY_AUTH_TOKEN), lastSynced: new Date().toISOString() },
         { id: '4', provider: 'github', name: 'GitHub Repositories', connected: Boolean(process.env.GITHUB_TOKEN), lastSynced: new Date().toISOString() },
+        { id: '5', provider: 'vercel', name: 'Vercel Deployments', connected: Boolean(process.env.VERCEL_TOKEN), lastSynced: new Date().toISOString() },
       ],
     });
   });
@@ -38,6 +39,7 @@ export async function integrationsRoutes(fastify: FastifyInstance) {
     if (provider === 'github') process.env.GITHUB_TOKEN = apiKey;
     if (provider === 'posthog') process.env.POSTHOG_API_KEY = apiKey;
     if (provider === 'sentry') process.env.SENTRY_AUTH_TOKEN = apiKey;
+    if (provider === 'vercel') process.env.VERCEL_TOKEN = apiKey;
 
     return reply.send({
       success: true,
