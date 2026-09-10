@@ -1,33 +1,41 @@
 import { FastifyInstance } from 'fastify';
+import { fetchStripeMetrics } from '../services/stripeConnector.js';
+import { fetchGitHubMetrics } from '../services/githubConnector.js';
+import { fetchPostHogMetrics } from '../services/posthogConnector.js';
 
 export async function metricsRoutes(fastify: FastifyInstance) {
   fastify.get('/api/v1/metrics/summary', async (request, reply) => {
+    // Concurrently fetch live metrics across all configured provider APIs
+    const [stripe, github, posthog] = await Promise.all([
+      fetchStripeMetrics(),
+      fetchGitHubMetrics(),
+      fetchPostHogMetrics(),
+    ]);
+
+    const anomalies = [];
+    if (posthog.signups_today === 0) {
+      anomalies.push({
+        type: 'zero_signups',
+        severity: 'critical',
+        message: 'Zero signups recorded today. Check Stripe webhook or signup API endpoints.',
+      });
+    }
+
     return reply.send({
       success: true,
       timestamp: new Date().toISOString(),
       metrics: {
-        stripe: {
-          mrr_cents: 124000,
-          formatted_mrr: '$1,240.00',
-          growth_percentage: 12.5,
-          active_subscribers: 84,
-        },
-        posthog: {
-          signups_today: 48,
-          active_users_dau: 312,
-        },
+        stripe,
+        github,
+        posthog,
         sentry: {
           critical_errors: 0,
           total_exceptions_24h: 3,
           status: 'healthy',
-        },
-        github: {
-          stars_count: 342,
-          new_stars_this_week: 14,
-          open_issues: 2,
+          is_live: false,
         },
       },
-      anomalies: [],
+      anomalies,
     });
   });
 }
