@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Zap, DollarSign, Users, ShieldAlert, Star, 
-  CheckCircle2, RefreshCw, Plus, Terminal, ExternalLink, X, Key, Lock
+  CheckCircle2, RefreshCw, Plus, Terminal, ExternalLink, X, Key, Lock, Layers
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -18,6 +18,7 @@ export default function Dashboard() {
     github: true,
     posthog: false,
     sentry: false,
+    vercel: true,
   });
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function Dashboard() {
   const integrations = [
     { name: 'Stripe Billing', provider: 'stripe', desc: 'MRR, ARR, Subscriptions & Net Revenue', oauthUrl: 'http://localhost:4000/api/v1/auth/stripe' },
     { name: 'GitHub Repositories', provider: 'github', desc: 'Stars, Open Issues, PRs & Activity', oauthUrl: 'http://localhost:4000/api/v1/auth/github' },
+    { name: 'Vercel Deployments', provider: 'vercel', desc: 'Deployment Status, Function Invocations & Bandwidth' },
     { name: 'PostHog Analytics', provider: 'posthog', desc: 'Daily Signups, DAU & Pageviews' },
     { name: 'Sentry Error Tracking', provider: 'sentry', desc: 'Critical Exceptions & 5xx Spikes' },
   ];
@@ -120,11 +122,11 @@ export default function Dashboard() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-900 pb-6">
           <div>
             <h1 className="text-2xl font-bold text-white">Metrics Digest Overview</h1>
-            <p className="text-sm text-slate-400 mt-1">Real-time status snapshot for today across all connected integrations.</p>
+            <p className="text-sm text-slate-400 mt-1">Real-time status snapshot for today across all 5 core integrations.</p>
           </div>
           <div className="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold px-3 py-1.5 rounded-lg">
             <CheckCircle2 className="h-4 w-4" />
-            <span>All Active Integrations Operating Normally</span>
+            <span>5 Core Integrations Active & Healthy</span>
           </div>
         </div>
 
@@ -167,8 +169,8 @@ export default function Dashboard() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-white">App Integrations & Accounts</h2>
-              <p className="text-xs text-slate-400">Connect your apps using 1-Click OAuth or API Secret Keys.</p>
+              <h2 className="text-lg font-bold text-white">Core Apps & Integrations Suite (5 Total)</h2>
+              <p className="text-xs text-slate-400">Stripe, GitHub, Vercel, PostHog, and Sentry.</p>
             </div>
           </div>
 
