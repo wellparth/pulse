@@ -7,6 +7,7 @@ import { integrationsRoutes } from './routes/integrations.js';
 import { oauthRoutes } from './routes/oauth.js';
 import { notificationRoutes } from './routes/notifications.js';
 import { authRoutes } from './routes/auth.js';
+import { startCronWorker } from './services/cronWorker.js';
 
 const fastify = Fastify({
   logger: {
@@ -34,6 +35,9 @@ async function main() {
   await fastify.register(oauthRoutes);
   await fastify.register(notificationRoutes);
   await fastify.register(authRoutes);
+
+  // Start background daily metrics cron worker
+  startCronWorker();
 
   const PORT = Number(process.env.PORT) || 4000;
   const HOST = process.env.HOST || '0.0.0.0';
