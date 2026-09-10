@@ -7,6 +7,7 @@ import { integrationsRoutes } from './routes/integrations.js';
 import { oauthRoutes } from './routes/oauth.js';
 import { notificationRoutes } from './routes/notifications.js';
 import { authRoutes } from './routes/auth.js';
+import { pulseOauthRoutes } from './routes/pulseOauth.js';
 import { startCronWorker } from './services/cronWorker.js';
 
 const fastify = Fastify({
@@ -35,6 +36,7 @@ async function main() {
   await fastify.register(oauthRoutes);
   await fastify.register(notificationRoutes);
   await fastify.register(authRoutes);
+  await fastify.register(pulseOauthRoutes);
 
   // Start background daily metrics cron worker
   startCronWorker();
